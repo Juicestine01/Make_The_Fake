@@ -24,4 +24,4 @@ let config = {
 let game = new Phaser.Game(config);
 let cursors;
 let countdown = 0;
-const carVelocity = 50;
+let bgs = 2

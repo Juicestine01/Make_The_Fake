@@ -10,24 +10,19 @@ class Play extends Phaser.Scene {
         this.load.image('car', './assets/Images/NewWCar.png')
         this.load.audio('moveit', './assets/audio/CmonMoveIt.mp3')
         this.load.audio('pullover', './assets/audio/PullOver.mp3')
+        this.load.spritesheet('explosion', './assets/Images/explosion3.png', {frameWidth: 125, frameHeight: 125, startFrame: 0, endFrame: 6});
     }
 
     create() {
         this.background = this.add.tileSprite(0, 0, game.config.width, game.config.height, 'bkg').setOrigin(0)
-        this.bus = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.3, 'bus')
-        this.player = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.1, 'car')
+        this.bus = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.3, 'bus').setOrigin(0.5, 0.5)
+        this.bus.setSize(50, 100)
+        this.player = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.1, 'car').setOrigin(0.5, 0.5)
+        this.player.setSize(50, 100)
+        this.player.destroyed = false
         this.physics.world.setBounds(200, 0, 560, game.config.height)
-        this.physics.world.enable(this.bus)
-        this.bus.body.collideWorldBounds = true
-
-        this.gameOver = false
-
-
-        this.obstacleGroup = this.physics.add.group()
-
-        this.placeObstacles()
-
-        this.physics.add.collider(this.player, this.obstacleGroup, this.handleCollision)
+        this.bus.setCollideWorldBounds(true)
+        this.player.setCollideWorldBounds(true)
 
         //Initializing Timer Mechanic
 
@@ -50,57 +45,52 @@ class Play extends Phaser.Scene {
             },
             callbackScope: this
         })
+        this.anims.create({
+            key: 'explode',
+            frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 6, first: 0 }),
+            frameRate: 15
+        });
         cursors = this.input.keyboard.createCursorKeys();
     }
 
     update() {
-        this.background.tilePositionY -= 2
-        if (cursors.left.isDown) {
-            this.player.setVelocityX(-100);
-        }
-        else if (cursors.right.isDown) {
-            this.player.setVelocityX(100);
-        }
-        else if (cursors.up.isDown) {
-            this.player.setVelocityY(-100)
-        }
-        else if (cursors.down.isDown) {
-            this.player.setVelocityY(100)
-        }
+        this.background.tilePositionY -= bgs
 
-        this.physics.moveToObject(this.bus, this.player, 100)
-
-        // Move the bus with a constant speed
-        if (this.busMovingUp) {
-            this.bus.setVelocityY(-100) // Move up
-        } else {
-            this.bus.setVelocityY(100)  // Move down
+        if (!this.player.destroyed) {
+            if (cursors.left.isDown) {
+                this.player.setVelocityX(-100);
+            }
+            else if (cursors.right.isDown) {
+                this.player.setVelocityX(100);
+            }
+            else if (cursors.up.isDown) {
+                this.player.setVelocityY(-100)
+            }
+            else if (cursors.down.isDown) {
+                this.player.setVelocityY(100)
+            }
+    
+            this.physics.moveToObject(this.bus, this.player, 125)
+    
+            // Move the bus with a constant speed
+            if (this.busMovingUp) {
+                this.bus.setVelocityY(-75); // Move up
+            } else {
+                this.bus.setVelocityY(75);  // Move down
+            }
+    
+            // Check if the bus is near the top or bottom of the scene
+            if (this.bus.y < 150) {
+                this.busMovingUp = false;
+            } else if (this.bus.y > 320) {
+                this.busMovingUp = true;
+            }
+            this.physics.world.collide(this.player, this.bus, this.handleCollision, null, this)
         }
-
-        // Check if the bus is near the top or bottom of the scene
-        if (this.bus.y < 25) {
-            this.busMovingUp = false
-        } else if (this.bus.y > 320) {
-            this.busMovingUp = true
-        }
-        else if (this.bus.y > this.player.y - 75) {
-            this.busMovingUp = true
-        }
-
+        
         if (this.player.y < this.bus.y - 50) {
             this.time.delayedCall(1500, () => { this.scene.start('GameOverScene') })
         }
-    }
-
-    placeObstacles() {
-        for (let i = 0; i < 5; i++) {
-            const obstacle = this.obstacleGroup.create(
-            Phaser.Math.Between(200, 760),
-            'obstacle'
-        )
-        obstacle.setCollideWorldBounds(true)
-        obstacle.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200,200))
-        } 
     }
 
     countDown() {
@@ -118,7 +108,13 @@ class Play extends Phaser.Scene {
     }
     
     handleCollision() {
-        this.gameOver = true
-        this.time.delayedCall(1500, () => { this.scene.start('gameOverScene') })
+        this.player.destroyed = true;
+        bgs = 0
+        this.bus.setVelocityY(0)
+        this.player.setVelocityY(0)
+        this.cameras.main.shake(2500, 0.0075);
+        let boom = this.add.sprite(this.player.x, this.player.y - 40, 'explosion').setOrigin(0.5, 0.5);
+        boom.anims.play('explode');
+        this.time.delayedCall(1500, () => { this.scene.start('gameOverScene'); });
     }
 }
