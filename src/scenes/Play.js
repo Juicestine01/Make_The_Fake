@@ -15,18 +15,19 @@ class Play extends Phaser.Scene {
 
     create() {
         this.background = this.add.tileSprite(0, 0, game.config.width, game.config.height, 'bkg').setOrigin(0)
+        bgs = 2
         this.bus = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.3, 'bus').setOrigin(0.5, 0.5)
         this.bus.setSize(50, 100)
         this.player = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.1, 'car').setOrigin(0.5, 0.5)
         this.player.setSize(50, 100)
         this.player.destroyed = false
-        this.physics.world.setBounds(200, 0, 560, game.config.height)
+        this.physics.world.setBounds(200, 0, 530, game.config.height)
         this.bus.setCollideWorldBounds(true)
         this.player.setCollideWorldBounds(true)
 
         //Initializing Timer Mechanic
 
-        this.initialTime = 300
+        this.initialTime = 120
         this.timerText = this.add.text(50, 16, "Time Remaining ", { fontSize: '32px', fill: '#000000'})
         this.timedEvent = this.time.addEvent({
             delay: 1000,
@@ -45,6 +46,7 @@ class Play extends Phaser.Scene {
             },
             callbackScope: this
         })
+        this.anims.remove('explode')
         this.anims.create({
             key: 'explode',
             frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 6, first: 0 }),
@@ -58,19 +60,26 @@ class Play extends Phaser.Scene {
 
         if (!this.player.destroyed) {
             if (cursors.left.isDown) {
-                this.player.setVelocityX(-100);
+                this.player.setVelocityX(-80);
             }
             else if (cursors.right.isDown) {
-                this.player.setVelocityX(100);
+                this.player.setVelocityX(80);
             }
             else if (cursors.up.isDown) {
-                this.player.setVelocityY(-100)
+                this.player.setVelocityY(-80)
             }
             else if (cursors.down.isDown) {
-                this.player.setVelocityY(100)
+                this.player.setVelocityY(80)
             }
+            
+            if (this.player.body.velocity.x > maxVelocity) {
+                this.player.setVelocityX(maxVelocity);
+            } else if (this.player.body.velocity.x < -maxVelocity) {
+                this.player.setVelocityX(-maxVelocity);
+            }
+
     
-            this.physics.moveToObject(this.bus, this.player, 125)
+            this.physics.moveToObject(this.bus, this.player, 105)
     
             // Move the bus with a constant speed
             if (this.busMovingUp) {
@@ -89,7 +98,7 @@ class Play extends Phaser.Scene {
         }
         
         if (this.player.y < this.bus.y - 50) {
-            this.time.delayedCall(1500, () => { this.scene.start('GameOverScene') })
+            this.time.delayedCall(1500, () => { this.scene.start('GameOverWinScene') })
         }
     }
 
@@ -103,7 +112,7 @@ class Play extends Phaser.Scene {
         this.initialTime = this.initialTime - 1
 
         if (this.initialTime < 0) {
-            this.scene.start('GameOverScene')
+            this.scene.start('GameOverLoseScene')
         }
     }
     
@@ -112,9 +121,11 @@ class Play extends Phaser.Scene {
         bgs = 0
         this.bus.setVelocityY(0)
         this.player.setVelocityY(0)
+        this.player.setVelocityX(0)
         this.cameras.main.shake(2500, 0.0075);
         let boom = this.add.sprite(this.player.x, this.player.y - 40, 'explosion').setOrigin(0.5, 0.5);
         boom.anims.play('explode');
-        this.time.delayedCall(1500, () => { this.scene.start('gameOverScene'); });
+        
+        this.time.delayedCall(1500, () => { this.scene.start('GameOverLoseScene'); });
     }
 }

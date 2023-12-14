@@ -18,10 +18,11 @@ let config = {
             }
         }
     },
-    scene: [ Menu, Instruction, Play, GameOver,]
+    scene: [ Menu, Instruction, Play, GameOverWin, GameOverLose]
 }
 
 let game = new Phaser.Game(config);
-let cursors;
-let countdown = 0;
+let cursors
+let countdown = 0
 let bgs = 2
+let maxVelocity = 125
