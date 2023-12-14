@@ -11,6 +11,8 @@ class Play extends Phaser.Scene {
         this.load.audio('moveit', './assets/audio/CmonMoveIt.mp3')
         this.load.audio('pullover', './assets/audio/PullOver.mp3')
         this.load.spritesheet('explosion', './assets/Images/explosion3.png', {frameWidth: 125, frameHeight: 125, startFrame: 0, endFrame: 6});
+
+        this.load.image('snow', './assets/Images/snow.png')
     }
 
     create() {
@@ -21,7 +23,7 @@ class Play extends Phaser.Scene {
         this.player = this.physics.add.sprite(game.config.width / 2 + game.config.width*.15, game.config.height - game.config.height*.1, 'car').setOrigin(0.5, 0.5)
         this.player.setSize(50, 100)
         this.player.destroyed = false
-        this.physics.world.setBounds(200, 0, 530, game.config.height)
+        this.physics.world.setBounds(230, 0, 530, game.config.height)
         this.bus.setCollideWorldBounds(true)
         this.player.setCollideWorldBounds(true)
 
@@ -52,6 +54,25 @@ class Play extends Phaser.Scene {
             frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 6, first: 0 }),
             frameRate: 15
         });
+
+        const emitter = this.add.particles(0, 0, 'snow', {
+            x: 0,
+            y: 0,
+            emitZone: {
+                source: new Phaser.Geom.Rectangle(0, -150, game.config.width, game.config.height),
+                type: 'random',
+                quantity: 70
+            },
+            speedY: { min: 50, max: 70 },
+            accelerationY: { random: [15, 25] },
+            accelerationX: { random: [15, 25] },
+            lifespan: { min: 8000, max: 10000 },
+            scale: { random: [0.25, 0.75] },
+            gravityY: 125,
+            frequency: 10,
+            blendMode: 'ADD'
+        });
+
         cursors = this.input.keyboard.createCursorKeys();
     }
 
@@ -79,7 +100,7 @@ class Play extends Phaser.Scene {
             }
 
     
-            this.physics.moveToObject(this.bus, this.player, 105)
+            this.physics.moveToObject(this.bus, this.player, 110)
     
             // Move the bus with a constant speed
             if (this.busMovingUp) {
@@ -97,8 +118,8 @@ class Play extends Phaser.Scene {
             this.physics.world.collide(this.player, this.bus, this.handleCollision, null, this)
         }
         
-        if (this.player.y < this.bus.y - 50) {
-            this.time.delayedCall(1500, () => { this.scene.start('GameOverWinScene') })
+        if (this.player.y < this.bus.y - 200) {
+            this.time.delayedCall(250, () => { this.scene.start('GameOverWinScene') })
         }
     }
 

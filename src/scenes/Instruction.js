@@ -3,7 +3,7 @@ class Instruction extends Phaser.Scene {
         super('InstructionScene');
     }
     create() {
-        this.add.text(game.config.width/2, game.config.height/2, 'Use the LEFT and RIGHT ARROWS to Maneuver', { fontFamily: 'After Hours', fontSize: 32 }).setOrigin(0.5)
+        this.add.text(game.config.width/2, game.config.height/2, 'Use the ARROW KEYS to Maneuver', { fontFamily: 'After Hours', fontSize: 32 }).setOrigin(0.5)
         this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press DOWN ARROW to go back', { fontFamily: 'After Hours', fontSize: 32 } ).setOrigin(0.5)
 
         cursors = this.input.keyboard.createCursorKeys();
