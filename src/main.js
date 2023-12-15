@@ -1,5 +1,7 @@
 // Justin Xu
 // Make The Fake
+//The 5 phaser componenets which I used were a physics system, particle emitter,
+//camera control from the collision, an explosion animation, and a timer
 
 let config = {
     parent: 'myGame',
@@ -18,7 +20,7 @@ let config = {
             }
         }
     },
-    scene: [ Menu, Instruction, Play, GameOverWin, GameOverLose]
+    scene: [ Menu, Instruction, Play, GameOverWin, GameOverLose, Credits]
 }
 
 let game = new Phaser.Game(config);
